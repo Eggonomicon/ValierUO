@@ -1,0 +1,12 @@
+<Project>
+  <PropertyGroup>
+    <!-- Keep behavior stable; this is just quality-of-life and reproducibility. -->
+    <Deterministic>true</Deterministic>
+    <ContinuousIntegrationBuild Condition="'$(GITHUB_ACTIONS)' == 'true'">true</ContinuousIntegrationBuild>
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+
+    <!-- ServUO targets net48; keep nullable off to avoid huge warning floods. -->
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>false</ImplicitUsings>
+  </PropertyGroup>
+</Project>

@@ -8,3 +8,5 @@ charset = utf-8
 trim_trailing_whitespace = true
 insert_final_newline = true
 
+# Keep formatting predictable without forcing broad style rewrites
+dotnet_sort_system_directives_first = true
