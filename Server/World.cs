@@ -1094,9 +1094,14 @@ namespace Server
 
 		internal static int m_Saves;
 
+		public static DateTime LastSaveUtc { get; private set; }
+		public static TimeSpan LastSaveDuration { get; private set; }
+		public static string LastSaveStrategyName { get; private set; }
+
 		public static void Save()
 		{
-			Save(true, false);
+			ValierUOConfig.EnsureLoaded();
+			Save(true, ValierUOConfig.PermitBackgroundWriteDefault);
 		}
 
 		public static void Save(bool message, bool permitBackgroundWrite)
@@ -1175,6 +1180,10 @@ namespace Server
             }
 
 			watch.Stop();
+
+			LastSaveUtc = DateTime.UtcNow;
+			LastSaveDuration = watch.Elapsed;
+			LastSaveStrategyName = strategy.Name;
 
 			m_Saving = false;
 

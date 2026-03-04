@@ -438,7 +438,7 @@ namespace Server
             DateTime buildDate = File.GetLastWriteTimeUtc(ExePath);
 
             Utility.PushColor(ConsoleColor.Cyan);
-            Console.WriteLine("ServUO {0} @ {1} UTC{2}", ver, buildDate, Debug ? " - Debug" : string.Empty);
+            Console.WriteLine("ValierUO {0} @ {1} UTC{2}", ver, buildDate, Debug ? " - Debug" : string.Empty);
             Utility.PopColor();
 
             string s = Arguments;

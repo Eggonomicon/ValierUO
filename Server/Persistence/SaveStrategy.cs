@@ -1,12 +1,51 @@
 using System;
 
+using Server.Configuration;
+
 namespace Server
 {
     public abstract class SaveStrategy
     {
         public abstract string Name { get; }
+
         public static SaveStrategy Acquire()
         {
+            // Allow config override
+            ValierUOConfig.EnsureLoaded();
+
+            string mode = ValierUOConfig.SaveStrategy;
+
+            if (!String.IsNullOrEmpty(mode) && !mode.Equals("auto", StringComparison.OrdinalIgnoreCase))
+            {
+                int pc = Core.ProcessorCount;
+
+                switch (mode)
+                {
+                    case "standard":
+                        return new StandardSaveStrategy();
+
+                    case "dual":
+                        return Core.MultiProcessor ? (SaveStrategy)new DualSaveStrategy() : new StandardSaveStrategy();
+
+                    case "parallel":
+                        if (Core.MultiProcessor && pc > 1)
+                            return new ParallelSaveStrategy(pc);
+
+                        return new StandardSaveStrategy();
+
+                    case "dynamic":
+                        if (Core.MultiProcessor)
+                            return new DynamicSaveStrategy();
+
+                        return new StandardSaveStrategy();
+
+                    default:
+                        // fall back to auto selection
+                        break;
+                }
+            }
+
+            // Auto selection (existing behavior)
             if (Core.MultiProcessor)
             {
                 int processorCount = Core.ProcessorCount;
@@ -27,10 +66,8 @@ namespace Server
                     return new DualSaveStrategy();
                 }
             }
-            else
-            {
-                return new StandardSaveStrategy();
-            }
+
+            return new StandardSaveStrategy();
         }
 
         public abstract void Save(SaveMetrics metrics, bool permitBackgroundWrite);
