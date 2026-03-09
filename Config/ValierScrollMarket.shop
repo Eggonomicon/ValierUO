@@ -1,0 +1,18 @@
+# ValierScrollMarket.shop
+# Limited scroll market (PowerScrolls)
+RotateScrollsDaily=false
+ActiveScrolls=12
+
+# scroll|id|display|skill|value|priceGold|priceCoins|limitPerDay|notes
+scroll|magery105|Power Scroll (Magery 105)|Magery|105.0|150000|0|2|Starter champs support
+scroll|magery110|Power Scroll (Magery 110)|Magery|110.0|300000|0|1|Mid-tier
+scroll|taming105|Power Scroll (Animal Taming 105)|AnimalTaming|105.0|150000|0|2|Starter champs support
+scroll|taming110|Power Scroll (Animal Taming 110)|AnimalTaming|110.0|300000|0|1|Mid-tier
+scroll|eval105|Power Scroll (Eval Int 105)|EvalInt|105.0|150000|0|2|Starter champs support
+scroll|eval110|Power Scroll (Eval Int 110)|EvalInt|110.0|300000|0|1|Mid-tier
+scroll|resist105|Power Scroll (Resist 105)|MagicResist|105.0|120000|0|2|Starter champs support
+scroll|resist110|Power Scroll (Resist 110)|MagicResist|110.0|250000|0|1|Mid-tier
+scroll|bs105|Power Scroll (Blacksmith 105)|Blacksmith|105.0|80000|0|3|Crafters
+scroll|tailor105|Power Scroll (Tailoring 105)|Tailoring|105.0|80000|0|3|Crafters
+scroll|magery115|Power Scroll (Magery 115)|Magery|115.0|900000|10|1|High tier (gold + coins)
+scroll|magery120|Power Scroll (Magery 120)|Magery|120.0|2500000|25|1|Very rare

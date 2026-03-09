@@ -1,0 +1,15 @@
+# ValierBuyOrders.shop
+# Resource Buy Orders (turn in for Valier coins + optional gold)
+Enabled=true
+RotateBuyOrdersDaily=true
+ActiveBuyOrders=4
+DailyCoinCapPerAccount=200
+InteractionRange=3
+
+# order|id|display|type|amount|coins|gold|maxPerDay|notes
+order|ingots|Ingots (Any Metal)|BaseIngot|500|10|250|6|OSI-ish crafting supply
+order|boards|Boards (Any Wood)|Board|500|10|250|6|Carpentry/fletching
+order|leather|Leather (Any)|BaseLeather|200|8|200|6|Tailoring support
+order|feathers|Feathers|Feather|1000|6|150|6|Fletching support
+order|regs|Reagents (Mixed)|BaseReagent|200|6|150|6|Mage supply
+order|ore|Ore/Granite|BaseOre|500|10|250|4|Mining support
