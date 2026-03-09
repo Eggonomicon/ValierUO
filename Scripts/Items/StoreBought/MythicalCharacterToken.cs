@@ -61,7 +61,126 @@ namespace Server.Items
             int version = reader.ReadInt();
         }
 
-        public class InternalGump : BaseGump
+        
+        /// <summary>
+        /// Reads Config/PlayerCaps.cfg (your ValierUO caps config) so this token always matches your shard caps.
+        /// </summary>
+        private static class PlayerCapsCfg
+        {
+            private static bool _loaded;
+            private static DateTime _lastLoad;
+            private static readonly Dictionary<string, string> _kv = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+            private static string PathFile
+            {
+                get { return System.IO.Path.Combine(Core.BaseDirectory, "Config", "PlayerCaps.cfg"); }
+            }
+
+            private static void EnsureLoaded()
+            {
+                // Reload at most once per minute (covers live edits without spam)
+                if (_loaded && (DateTime.UtcNow - _lastLoad) < TimeSpan.FromMinutes(1))
+                    return;
+
+                _loaded = true;
+                _lastLoad = DateTime.UtcNow;
+                _kv.Clear();
+
+                try
+                {
+                    if (!System.IO.File.Exists(PathFile))
+                        return;
+
+                    string[] lines = System.IO.File.ReadAllLines(PathFile);
+
+                    for (int i = 0; i < lines.Length; i++)
+                    {
+                        string line = lines[i];
+                        if (line == null)
+                            continue;
+
+                        int hash = line.IndexOf('#');
+                        if (hash >= 0)
+                            line = line.Substring(0, hash);
+
+                        line = line.Trim();
+
+                        if (line.Length == 0)
+                            continue;
+
+                        int eq = line.IndexOf('=');
+                        if (eq <= 0)
+                            continue;
+
+                        string key = line.Substring(0, eq).Trim();
+                        string val = line.Substring(eq + 1).Trim();
+
+                        if (key.Length == 0)
+                            continue;
+
+                        _kv[key] = val;
+                    }
+                }
+                catch
+                {
+                    // ignore; fall back to defaults
+                }
+            }
+
+            private static int GetInt(string key, int def)
+            {
+                EnsureLoaded();
+
+                string s;
+                if (_kv.TryGetValue(key, out s))
+                {
+                    int v;
+                    if (Int32.TryParse(s, out v))
+                        return v;
+                }
+
+                return def;
+            }
+
+            public static int GetTotalStatCap(PlayerMobile pm)
+            {
+                // Prefer config TotalStatCap, otherwise use character statcap
+                int cfg = GetInt("TotalStatCap", 0);
+                if (cfg > 0)
+                    return cfg;
+
+                return pm != null ? pm.StatCap : 225;
+            }
+
+            public static int GetStrMaxCap(PlayerMobile pm)
+            {
+                // Prefer enhanced cap keys; fall back to base caps; then legacy StatCap.
+                int cfg = GetInt("StrMaxCap", 0);
+                if (cfg <= 0) cfg = GetInt("StrCap", 0);
+                if (cfg <= 0) cfg = GetInt("StatCap", 125);
+
+                // Safety: don't allow less than 10
+                return Math.Max(10, cfg);
+            }
+
+            public static int GetDexMaxCap(PlayerMobile pm)
+            {
+                int cfg = GetInt("DexMaxCap", 0);
+                if (cfg <= 0) cfg = GetInt("DexCap", 0);
+                if (cfg <= 0) cfg = GetInt("StatCap", 125);
+                return Math.Max(10, cfg);
+            }
+
+            public static int GetIntMaxCap(PlayerMobile pm)
+            {
+                int cfg = GetInt("IntMaxCap", 0);
+                if (cfg <= 0) cfg = GetInt("IntCap", 0);
+                if (cfg <= 0) cfg = GetInt("StatCap", 125);
+                return Math.Max(10, cfg);
+            }
+        }
+
+public class InternalGump : BaseGump
         {
             public MythicCharacterToken Token { get; set; }
             public Skill[] Selected { get; set; }
@@ -123,7 +242,7 @@ namespace Server.Items
                 AddHtmlLocalized(0, 12, Width, 20, 1152352, White, false, false); // <center>Mythic Character Skill Selection</center>
 
                 AddHtmlLocalized(0, 45, Width / 3, 20, 1152354, Yellow, false, false); // <CENTER>Set Attributes</CENTER>
-                AddHtmlLocalized(0, 65, Width / 3, 20, 1152355, User.StatCap.ToString(), Beige, false, false); // <CENTER>Total Must Equal ~1_VAL~
+                AddHtmlLocalized(0, 65, Width / 3, 20, 1152355, PlayerCapsCfg.GetTotalStatCap(User).ToString(), Beige, false, false); // <CENTER>Total Must Equal ~1_VAL~
 
                 AddBackground(11, 85, 80, 20, 3000);
                 AddBackground(11, 106, 80, 20, 3000);
@@ -227,7 +346,7 @@ namespace Server.Items
                         break;
                     case 2501: // Continue
                         SetStats(info);
-                        if ((Str + Dex + Int) != User.StatCap)
+                        if ((Str + Dex + Int) != PlayerCapsCfg.GetTotalStatCap(User))
                         {
                             User.SendLocalizedMessage(1152359); // Your Strength, Dexterity, and Intelligence values do not add up to the total indicated in 
                             // the upper left area of this window. Before continuing, you must adjust these values so 
@@ -290,14 +409,20 @@ namespace Server.Items
                 var entry2 = info.GetTextEntry(2);
                 var entry3 = info.GetTextEntry(3);
 
+                int min = 10;
+
+                int maxStr = PlayerCapsCfg.GetStrMaxCap(User);
+                int maxDex = PlayerCapsCfg.GetDexMaxCap(User);
+                int maxInt = PlayerCapsCfg.GetIntMaxCap(User);
+
                 if (entry1 != null)
-                    Str = Math.Min(125, Math.Max(10, Utility.ToInt32(entry1.Text)));
+                    Str = Math.Min(maxStr, Math.Max(min, Utility.ToInt32(entry1.Text)));
 
                 if (entry2 != null)
-                    Dex = Math.Min(125, Math.Max(10, Utility.ToInt32(entry2.Text)));
+                    Dex = Math.Min(maxDex, Math.Max(min, Utility.ToInt32(entry2.Text)));
 
                 if (entry3 != null)
-                    Int = Math.Min(125, Math.Max(10, Utility.ToInt32(entry3.Text)));
+                    Int = Math.Min(maxInt, Math.Max(min, Utility.ToInt32(entry3.Text)));
             }
 
             private bool CanSelect(SkillName skill)

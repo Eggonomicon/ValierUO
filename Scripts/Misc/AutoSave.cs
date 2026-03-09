@@ -2,7 +2,6 @@ using System;
 using System.IO;
 
 using Server.Commands;
-using Server.Configuration;
 
 namespace Server.Misc
 {
@@ -56,8 +55,7 @@ namespace Server.Misc
 
         public static void Save()
         {
-            ValierUOConfig.EnsureLoaded();
-            Save(ValierUOConfig.PermitBackgroundWriteDefault);
+            Save(false);
         }
 
         public static void Save(bool permitBackgroundWrite)

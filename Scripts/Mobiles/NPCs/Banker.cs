@@ -498,7 +498,12 @@ namespace Server.Mobiles
                 entry.Enabled = from.Map.Rules == MapRules.FeluccaRules || CheckVendorAccess(from);
 
                 list.Add(entry);
-            }
+
+                // ValierUO: Account Bank (shared per account)
+                var aentry = new OpenAccountBankEntry(this);
+                aentry.Enabled = entry.Enabled;
+                list.Add(aentry);
+}
 
             base.AddCustomContextEntries(from, list);
         }
